@@ -109,9 +109,9 @@ __global__ void init_smallest_edges_weights(int num_edges, int *smallest_weights
 
 // driver
 int main(int argc, char** argv){
-	if(argc != 2){
+	if(argc != 3){
 		printf("mst: incorrect formatting\n");
-		printf("Valid input: mst.out <Input file name>\n");
+		printf("Valid input: mst.out <Input file name> <Output file name>\n");
 		return 0;
 	}
 
@@ -413,7 +413,7 @@ int main(int argc, char** argv){
     //printf("done with loop\n");
     /*end of while loop*/
     FILE *file;
-    file = fopen("output.txt","w+");
+    file = fopen(argv[argc-1],"w+");
     fprintf(file,"Input Graph\nVertices: %d Edges: %d\n", og_graph.num_vertices, og_graph.num_edges);
     fprintf(file, "MST Edges:\n");
     for(int i = 0; i < og_graph.num_edges; i++){
