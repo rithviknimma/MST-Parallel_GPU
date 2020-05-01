@@ -3,11 +3,10 @@
 #include <stdbool.h>
 
 #include <cuda.h>
-#include <cuda_runtime.h>
 
 #include <time.h>
 
-#define THREADSPERBLOCK 512
+#define THREADSPERBLOCK 64
 
 // graph
 struct edge{
@@ -121,11 +120,11 @@ int main(int argc, char** argv){
 	get_graph(&og_graph, argv[1]);
 
 	//debugging
-	printf("Graph:\n");
-	printf("vertices:%d edges:%d\n",og_graph.num_vertices, og_graph.num_edges);
-	for(int i = 0; i < og_graph.num_edges; i++){
-		printf("index:%d - %d   %d   %d\n", i, og_graph.edges[i].v, og_graph.edges[i].u, og_graph.edges[i].weight);
-	}
+	// printf("Graph:\n");
+	// printf("vertices:%d edges:%d\n",og_graph.num_vertices, og_graph.num_edges);
+	// for(int i = 0; i < og_graph.num_edges; i++){
+	// 	printf("index:%d - %d   %d   %d\n", i, og_graph.edges[i].v, og_graph.edges[i].u, og_graph.edges[i].weight);
+	// }
 
 	//***** CREATE BIPARTITE GRAPH *****//
 	struct b_graph bg_graph;
@@ -222,17 +221,17 @@ int main(int argc, char** argv){
         get_num_mst<<<(og_graph.num_edges  + THREADSPERBLOCK-1)/THREADSPERBLOCK, THREADSPERBLOCK>>>(og_graph.num_edges , d_mst_edges, d_solutionSize);
 
         // debugging
-        printf("MST:\n");
+        // printf("MST:\n");
         cudaMemcpy(mst_edges, d_mst_edges, og_graph.num_edges * sizeof(bool), cudaMemcpyDeviceToHost);
-        for(int i = 0; i < og_graph.num_edges; i++){
-            if(mst_edges[i] == true){
-                //printf("mst edges index: %d\n", i);
-                printf("index: %d - %d   %d   %d\n", i, og_graph.edges[i].v, og_graph.edges[i].u, og_graph.edges[i].weight);
-            }
-        }
+        // for(int i = 0; i < og_graph.num_edges; i++){
+        //     if(mst_edges[i] == true){
+        //         //printf("mst edges index: %d\n", i);
+        //         printf("index: %d - %d   %d   %d\n", i, og_graph.edges[i].v, og_graph.edges[i].u, og_graph.edges[i].weight);
+        //     }
+        // }
         
         cudaMemcpy(solution_size, d_solutionSize,  sizeof(int), cudaMemcpyDeviceToHost);
-        printf("Num MST edges found: %d\n",*solution_size);
+        // printf("Num MST edges found: %d\n",*solution_size);
         
         if(*solution_size <  (og_graph.num_vertices - 1)){
             //***** GET STRUT *****//
@@ -394,7 +393,6 @@ int main(int argc, char** argv){
             free(zero_diff_edges);
             free(super_vertices);
             free(new_vertex_b_debug);
-            free(vertex_b_print);
             
             cudaFree(d_prefix_helper);
             cudaFree(prefixSum);
@@ -412,8 +410,18 @@ int main(int argc, char** argv){
         }
     }
 
+    //printf("done with loop\n");
     /*end of while loop*/
-
+    FILE *file;
+    file = fopen("output.txt","w+");
+    fprintf(file,"Input Graph\nVertices: %d Edges: %d\n", og_graph.num_vertices, og_graph.num_edges);
+    fprintf(file, "MST Edges:\n");
+    for(int i = 0; i < og_graph.num_edges; i++){
+        if(mst_edges[i] == true){
+            fprintf(file, "index: %d - v: %d  u: %d  weight: %d\n", i, og_graph.edges[i].v, og_graph.edges[i].u, og_graph.edges[i].weight);
+        }
+    }
+    fclose(file);
 
     // malloc frees
     free(max_super_vertex);
