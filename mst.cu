@@ -6,10 +6,6 @@
 #include <cuda_runtime.h>
 
 #include <time.h>
-// #include <thrust/device_ptr.h>
-// #include <thrust/device_vector.h>
-// #include <thrust/sort.h>
-// #include <thrust/scan.h>
 
 #define THREADSPERBLOCK 512
 
